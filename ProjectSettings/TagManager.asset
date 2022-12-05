@@ -8,6 +8,9 @@ TagManager:
   - Fire
   - Enemy
   - Pick Up
+  - FireSpell
+  - IceSpell
+  - Slime
   layers:
   - Default
   - TransparentFX

@@ -93,14 +93,21 @@ public class FirstPersonAIO : MonoBehaviour {
     float baseCamFOV;
     
 
+    float time = 0f;
+    float timeDelay = 1f;
+
     public bool autoCrosshair = false;
     public bool drawStaminaMeter = true;
     float smoothRef;
     Image StaminaMeter;
     Image StaminaMeterBG;
     Image HealthBar;
+    public int playerHealth = 100;
     Image HealthBarBG;
     Image ManaBarBG;
+    public int playerMana = 100;
+    public bool canUseMana;
+    public int spellCost;
     Image ManaBar;
     public Sprite Crosshair;
     public Vector3 targetAngles;
@@ -366,6 +373,8 @@ public class FirstPersonAIO : MonoBehaviour {
 
     private void Update(){
 
+        time = time + 1f * Time.deltaTime;
+
         #region Look Settings - Update
 
             if(enableCameraMovement && !controllerPauseState){
@@ -416,6 +425,43 @@ public class FirstPersonAIO : MonoBehaviour {
 
     }
 
+    // Damage the player
+    public void getHit(int damage)
+    {
+        playerHealth -= damage;
+        Debug.Log("Player health = " + playerHealth);
+    }
+
+    // Get player health
+    public int getHealth() 
+    {
+        return playerHealth;
+    }
+
+    // Use a spell
+    public void useSpell(int cost) 
+    {
+        spellCost = cost;
+        canUseMana = true;
+    }
+
+    // use the mana of the player
+    public void useMana()
+    {
+        playerMana -= spellCost;
+        Debug.Log("player mana = " + playerMana);
+        //ManaBarBG.color = Vector4.MoveTowards(ManaBarBG.color, new Vector4(0,0,0,0.5f),0.15f);
+        //ManaBar.color = Vector4.MoveTowards(ManaBar.color, new Vector4(0,0,1,1),0.15f);
+    }
+
+    // Check the mana of the player 
+    public int getMana()
+    {
+        return playerMana;
+    }
+
+
+
     private void FixedUpdate(){
 
         #region Look Settings - FixedUpdate
@@ -423,7 +469,28 @@ public class FirstPersonAIO : MonoBehaviour {
         #endregion
 
         #region Movement Settings - FixedUpdate
-        
+
+        if(canUseMana)
+        {
+            useMana();
+            canUseMana = false;
+        } else if (playerMana < 100) 
+        {
+            if (time >= timeDelay)
+            {
+                time = 0f;
+                if (playerMana % 2 == 1) 
+                {
+                    playerMana += 1;
+                } else 
+                {
+                    playerMana += 2;
+                }
+                Debug.Log("player mana = " + playerMana);
+            }
+            
+        }
+
         if(useStamina){
             isSprinting = Input.GetKey(sprintKey) && !isCrouching && staminaInternal > 0 && (Mathf.Abs(fps_Rigidbody.velocity.x) > 0.01f || Mathf.Abs(fps_Rigidbody.velocity.z) > 0.01f);
             if(isSprinting){
